@@ -2,6 +2,8 @@ const mongoose = require("mongoose");
 const validator = require("validator");
 const bCryptJS = require("bcryptjs");
 const JWT = require("jsonwebtoken");
+// crypto is an inbuilt module of the Node.js
+const crypto = require("crypto");
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -23,10 +25,15 @@ const userSchema = new mongoose.Schema({
     minLength: [6, "The Password should be atleast 6 characters"],
     select: false,
   },
+  resetPasswordToken: String,
+  resetPasswordExpire: Date,
 });
 
 // Hashing the password
-userSchema.pre("save", async function () {
+userSchema.pre("save", async function (next) {
+  if (!this.isModified("password")) {
+    next();
+  }
   this.password = await bCryptJS.hash(this.password, 10);
 });
 
@@ -42,6 +49,22 @@ userSchema.methods.getJwtToken = function () {
   return JWT.sign({ idee: this._id }, process.env.JWT_SECRET_KEY, {
     expiresIn: process.env.JWT_EXPIRES_IN,
   });
+};
+
+// Generating Password Reset Token
+userSchema.methods.getResetPasswordToken = function () {
+  // Generating Token
+  const resetToken = crypto.randomBytes(20).toString("hex");
+
+  // Hashing and adding resetPasswordToken to userSchema
+  this.resetPasswordToken = crypto
+    .createHash("sha256")
+    .update(resetToken)
+    .digest("hex");
+
+  this.resetPasswordExpire = Date.now() + 15 * 60 * 1000;
+
+  return resetToken;
 };
 
 module.exports = mongoose.model("Users", userSchema);
