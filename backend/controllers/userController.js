@@ -3,12 +3,13 @@ const userSchema = require("../schemas/userSchema");
 const ErrorHandler = require("../utils/errorHandler");
 const sendEmail = require("../utils/sendEmail");
 const crypto = require("crypto");
+const sendToken = require("../utils/jwtToken");
 
 // 1. User Register
 exports.registerUser = catchAsynchErrors(async function (req, res, next) {
   const userCredentials = req.body;
   const user = await userSchema.create(userCredentials);
-  res.status(201).json({ user });
+  sendToken(user, 201, res);
 });
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<(|)>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
@@ -30,18 +31,20 @@ exports.userLogin = catchAsynchErrors(async function (req, res, next) {
   }
   //   If everything is good
   //   Provide the user with a JWT Token
-  const token = user.getJwtToken();
 
-  res
-    .status(200)
-    .cookie("token", token, {
-      expires: new Date(
-        // expire the cookie in 2 minutes
-        Date.now() + process.env.COOKIE_EXPIRES_IN * 60 * 1000
-      ),
-      httpOnly: true,
-    })
-    .json({ success: true, user, token });
+  // const token = user.getJwtToken();
+
+  // res
+  //   .status(200)
+  //   .cookie("token", token, {
+  //     expires: new Date(
+  //       // expire the cookie in 2 minutes
+  //       Date.now() + process.env.COOKIE_EXPIRES_IN * 60 * 1000
+  //     ),
+  //     httpOnly: true,
+  //   })
+  //   .json({ success: true, user, token });
+  sendToken(user, 200, res);
 });
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<(|)>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
@@ -122,16 +125,18 @@ exports.resetPassword = catchAsynchErrors(async function (req, res, next) {
 
   //   If everything is good
   //   Provide the user with a JWT Token
-  const token = user.getJwtToken();
 
-  res
-    .status(200)
-    .cookie("token", token, {
-      expires: new Date(
-        // expire the cookie in 2 minutes
-        Date.now() + process.env.COOKIE_EXPIRES_IN * 60 * 1000
-      ),
-      httpOnly: true,
-    })
-    .json({ success: true, user, token });
+  // const token = user.getJwtToken();
+  // res
+  //   .status(200)
+  //   .cookie("token", token, {
+  //     expires: new Date(
+  //       // expire the cookie in 2 minutes
+  //       Date.now() + process.env.COOKIE_EXPIRES_IN * 60 * 1000
+  //     ),
+  //     httpOnly: true,
+  //   })
+  //   .json({ success: true, user, token });
+
+  sendToken(user, 200, res);
 });
