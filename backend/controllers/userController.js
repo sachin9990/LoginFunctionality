@@ -15,10 +15,10 @@ exports.registerUser = catchAsynchErrors(async function (req, res, next) {
 
 // 2. User Login
 exports.userLogin = catchAsynchErrors(async function (req, res, next) {
-  const { email, password } = req.body;
-  //   console.log(userCredentials);
-  const user = await userSchema.findOne({ email }).select("+password");
+  const { loginEmail: email, loginPassword: password } = req.body;
 
+  const user = await userSchema.findOne({ email }).select("+password");
+  // console.log(user);
   //   Backend validation as the data resides in the backend
   if (!user) {
     return next(new ErrorHandler("Incorrect Credentials", 401));
