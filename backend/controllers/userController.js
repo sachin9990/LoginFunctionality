@@ -25,7 +25,7 @@ exports.userLogin = catchAsynchErrors(async function (req, res, next) {
   }
 
   const isPasswordSame = await user.comparePassword(password);
-
+  console.log(isPasswordSame);
   if (!isPasswordSame) {
     return next(new ErrorHandler("Incorrect Credentials", 401));
   }
