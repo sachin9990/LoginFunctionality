@@ -1,11 +1,14 @@
 const express = require("express");
 const mongoose = require("mongoose");
+const cookieParser = require("cookie-parser");
 require("dotenv").config();
 
 const app = express();
 
 // In order to receive json in req.body
 app.use(express.json());
+// In order to receive cookies in req.cookie
+app.use(cookieParser());
 
 // Listening to a port
 app.listen(process.env.PORT, () => {

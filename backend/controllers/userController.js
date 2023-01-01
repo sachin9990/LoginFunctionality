@@ -11,6 +11,47 @@ exports.registerUser = catchAsynchErrors(async function (req, res, next) {
   const user = await userSchema.create(userCredentials);
   sendToken(user, 201, res);
 });
+
+//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<(|)>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+// Name Update
+exports.updateName = catchAsynchErrors(async function (req, res) {
+  const updatedName = { name: req.body.name };
+
+  const user = await userSchema.findByIdAndUpdate(
+    req.authenticatedUser.id,
+    updatedName,
+    {
+      new: true,
+      runValidators: true,
+      useFindAndModify: false,
+    }
+  );
+  res.status(200).json({
+    success: true,
+  });
+});
+
+//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<(|)>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+// Password Update
+exports.updatePassword = catchAsynchErrors(async function (req, res) {
+  const updatedPassword = { name: req.body.password };
+
+  const user = await userSchema
+    .findById(req.authenticatedUser.id)
+    .select("+password");
+
+  const isPasswordSame = await user.comparePassword(req.body.oldPassword);
+
+  if (!isPasswordSame) {
+    return next(new ErrorHandler("Old password is incorrect", 400));
+  }
+  // check for confirm password in the front end only
+  user.password = req.body.newPassword;
+  await user.save();
+
+  sendToken(user, 200, res);
+});
+
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<(|)>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 // 2. User Login
@@ -29,21 +70,7 @@ exports.userLogin = catchAsynchErrors(async function (req, res, next) {
   if (!isPasswordSame) {
     return next(new ErrorHandler("Incorrect Credentials", 401));
   }
-  //   If everything is good
-  //   Provide the user with a JWT Token
 
-  // const token = user.getJwtToken();
-
-  // res
-  //   .status(200)
-  //   .cookie("token", token, {
-  //     expires: new Date(
-  //       // expire the cookie in 2 minutes
-  //       Date.now() + process.env.COOKIE_EXPIRES_IN * 60 * 1000
-  //     ),
-  //     httpOnly: true,
-  //   })
-  //   .json({ success: true, user, token });
   sendToken(user, 200, res);
 });
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<(|)>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -122,21 +149,6 @@ exports.resetPassword = catchAsynchErrors(async function (req, res, next) {
   user.resetPasswordExpire = undefined;
 
   await user.save();
-
-  //   If everything is good
-  //   Provide the user with a JWT Token
-
-  // const token = user.getJwtToken();
-  // res
-  //   .status(200)
-  //   .cookie("token", token, {
-  //     expires: new Date(
-  //       // expire the cookie in 2 minutes
-  //       Date.now() + process.env.COOKIE_EXPIRES_IN * 60 * 1000
-  //     ),
-  //     httpOnly: true,
-  //   })
-  //   .json({ success: true, user, token });
 
   sendToken(user, 200, res);
 });
