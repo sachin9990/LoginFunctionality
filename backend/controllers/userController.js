@@ -144,7 +144,7 @@ exports.resetPassword = catchAsynchErrors(async function (req, res, next) {
     );
   }
 
-  user.password = req.body.password;
+  user.password = req.body.newPassword;
   user.resetPasswordToken = undefined;
   user.resetPasswordExpire = undefined;
 
