@@ -66,7 +66,7 @@ exports.userLogin = catchAsynchErrors(async function (req, res, next) {
   }
 
   const isPasswordSame = await user.comparePassword(password);
-  console.log(isPasswordSame);
+  // console.log(isPasswordSame);
   if (!isPasswordSame) {
     return next(new ErrorHandler("Incorrect Credentials", 401));
   }
@@ -101,15 +101,15 @@ exports.forgotPassword = catchAsynchErrors(async function (req, res, next) {
   // Getting a token
   const resetToken = user.getResetPasswordToken();
   await user.save({ validateBeforeSave: false });
-  console.log(user);
+  // console.log(user);
 
-  const resetPasswordUrl = `http://localhost:3000/user/password/forgot/${resetToken}`;
+  const resetPasswordUrl = `http://localhost:3000/user/password/reset/${resetToken}`;
   const message = `Your password reset token is :- \n\n ${resetPasswordUrl} \n\nIf you have not requested this email, then please ignore it.`;
 
   try {
     await sendEmail({
       email: user.email,
-      subject: "Ecommerce Password Recovery",
+      subject: "Password Recovery",
       message,
     });
     res.status(200).json({
@@ -127,6 +127,8 @@ exports.forgotPassword = catchAsynchErrors(async function (req, res, next) {
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<(|)>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 // 5. Reset Password
 exports.resetPassword = catchAsynchErrors(async function (req, res, next) {
+  console.log("ResetPassword Hello");
+  console.log("Backend>>>>>>>", req.params.token);
   // creating a token hash
   const resetPasswordToken = crypto
     .createHash("sha256")
